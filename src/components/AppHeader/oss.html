@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="../../../node_modules/ali-oss/dist/aliyun-oss-sdk.js"></script>
+</head>
+<body>
+<form>
+<input type="file" name="picFieldName" id="picFieldId" onchange="hi()" />
+</form>
+    
+
+    <script>
+
+
+     　var client = new OSS({
+         accessKeySecret: '8IEjEEe3FboF2q5eEfr8NSkWMbBTZM',
+            accessKeyId: 'LTAI4FvYEZDSMScaUFbmoo5y',          
+           region: 'oss-cn-beijing',       
+           bucket: 'pb-20191014'
+     });
+
+
+
+//这个是查看你当前bucket这个库所有的文件
+  client.list().then((result) => {
+    console.log('objects: %j', result.objects);
+    return client.put('my-obj', new OSS.Buffer('hello world'));
+  }).then((result) => {
+    console.log('put result: %j', result);
+    return client.get('my-obj');
+  }).then((result) => {
+    console.log('get result: %j', result.content.toString());
+  }).catch(error=>{
+      console.log("error",error);
+  })
+
+ 
+    
+    </script>
+
+
+</body>
+</html>
