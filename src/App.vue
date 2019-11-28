@@ -22,7 +22,7 @@ export default {
     //页面重新加载
     reload() {
       this.isRouterAlive = false;
-      this.$nextTick(() => {
+      this.$nextTick(function() {
         this.isRouterAlive = true;
       });
     }

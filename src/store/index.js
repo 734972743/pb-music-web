@@ -12,5 +12,5 @@ const store = new Vuex.Store({
     music
   }
 });
-
+console.log("--store", store);
 export default store;

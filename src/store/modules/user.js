@@ -1,4 +1,4 @@
-import { saveUser, getUser, removeUser } from "@/utils/auth";
+import { saveUser, getUser, removeUser, removeCollection } from "@/utils/auth";
 import userApi from "@/api/user";
 
 const user = {
@@ -9,8 +9,15 @@ const user = {
 
   mutations: {
     SET_USER(state, user) {
-      state.user = user;
-      saveUser(user);
+      state.user = null;
+      if (user) {
+        delete user.password; //为了用户安全，移除掉用户密码信息
+      }
+      if (user) {
+        saveUser(user);
+      } else {
+        removeUser();
+      }
     }
   },
 
@@ -54,7 +61,9 @@ const user = {
     //退出系统
     Logout({ commit }) {
       commit("SET_USER", null);
+      //清空localStoreage数据
       removeUser();
+      removeCollection();
     },
 
     SaveUser({ commit }, user) {

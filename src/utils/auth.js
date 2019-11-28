@@ -4,6 +4,7 @@ const COLLECTION_KEY = "pb-music-collection";
 //这个是信息保存到本地localStorage中
 
 export function saveUser(user) {
+  
   return localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 

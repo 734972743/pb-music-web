@@ -271,7 +271,13 @@
 <script>
 import userApi from "@/api/user";
 import musicApi from "@/api/music";
-import { saveUser, getUser } from "@/utils/auth";
+import {
+  saveUser,
+  getUser,
+  removeUser,
+  getCollection,
+  removeCollection
+} from "@/utils/auth";
 import store from "@/store";
 const PubSub = require("pubsub-js");
 import AppUploadImage from "../AppUploadImage";
@@ -457,8 +463,8 @@ export default {
             });
             if (resp.flag) {
               this.loginVisible = false;
-              this.a = "2";
               this.user = getUser();
+              this.reload();
             }
           });
         } else {
@@ -531,6 +537,7 @@ export default {
             if (resp.flag) {
               this.registerVisible = false;
               this.user = getUser();
+              this.reload();
             }
           });
         } else {
@@ -542,6 +549,11 @@ export default {
     logout() {
       this.$store.dispatch("Logout");
       this.user = getUser();
+      let user = getUser();
+      let collection = getCollection();
+      if (!user && !collection) {
+        // this.reload(); //重新刷新页面
+      }
     },
 
     updatePsd(formName) {

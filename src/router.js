@@ -7,6 +7,7 @@ import AppMusic from "./views/hall/AppMusic";
 
 import MyMusic from "./views/MyMusic";
 import MyLikeMusic from "./components/MyMusicMain/MyLikeMusic.vue";
+import myMusicHistory from "./views/MyMusic/MyMusicHistory";
 import MyCreateSongList from "./views/MyMusic/MyCreateSongList";
 import MyUploadSong from "./views/MyMusic/MyUploadSong";
 
@@ -54,6 +55,11 @@ export default new Router({
               path: "/myMusic/myLikeMusic",
               name: "myLikeMusic",
               component: MyLikeMusic
+            },
+            {
+              path: "/myMusic/myMusicHistory",
+              name: "myMusicHistory",
+              component: myMusicHistory
             },
             {
               path: "/myMusic/myCreateSongList",

@@ -67,7 +67,7 @@
         <template slot-scope="scope">
           <i
             :id="'main-play-buttom' + scope.$index"
-            @click="palyMusic(scope.$index)"
+            @click="playMusic(scope.$index)"
             class="el-icon-video-play main-play-buttom"
           ></i>
           <i @click="downMusic(scope.row)" class="el-icon-download"></i>
@@ -199,7 +199,7 @@ const PubSub = require("pubsub-js");
 import { saveCollection, getCollection } from "@/utils/auth.js";
 
 export default {
-  inject: ["reload"], //注入依赖， 这个依赖在App.vue中定义了
+  inject: ["reload"], //注入依赖， 这个依赖在App.vue中定义了，这个是用于刷新页面
   data() {
     return {
       user: null, //用户信息
@@ -271,9 +271,9 @@ export default {
         return false;
       }
       if (music.index <= 0) {
-        this.palyMusic(0);
+        this.playMusic(0);
       } else {
-        this.palyMusic(music.index - 1);
+        this.playMusic(music.index - 1);
       }
     });
 
@@ -288,9 +288,9 @@ export default {
       }
       this.isPlay = false;
       if (music.index >= this.totalCount - 1) {
-        this.palyMusic(this.totalCount - 1);
+        this.playMusic(this.totalCount - 1);
       } else {
-        this.palyMusic(music.index + 1);
+        this.playMusic(music.index + 1);
       }
     });
   },
@@ -299,24 +299,25 @@ export default {
     //初始化数据
     initData() {
       this.user = this.$store.state.user.user;
+      this.changeSongType("所有");
     },
 
     changeSongType(val) {
       switch (val) {
         case "所有":
-          this.searchMap.typeId = "";
+          this.searchMap.typeId = [];
           break;
         case "新歌":
-          this.searchMap.typeId = 1;
+          this.searchMap.typeId = [1];
           break;
         case "热门歌曲":
-          this.searchMap.typeId = 2;
+          this.searchMap.typeId = [2];
           break;
         case "纯音乐":
-          this.searchMap.typeId = 10;
+          this.searchMap.typeId = [10];
           break;
         case "曲艺":
-          this.searchMap.typeId = 13;
+          this.searchMap.typeId = [13, 14, 15, 16];
           break;
       }
       this.fetchMusicData();
@@ -345,17 +346,26 @@ export default {
 
     fetchMusicData() {
       let collection = getCollection();
+      let getgetSongListsByUserIdApi = musicApi.getgetSongListsByUserId();
       if (!collection) {
         //collection为空，则去后台查用户有多少个收藏夹
-        musicApi.getgetSongListsByUserId().then(response => {
-          const resp = response.data;
-          if (resp.flag) {
-            saveCollection(resp.data);
-            //再获取collection数据
-            collection = getCollection();
-            this.reload();
-          }
-        });
+        musicApi.getgetSongListsByUserId();
+
+        if (getgetSongListsByUserIdApi) {
+          getgetSongListsByUserIdApi
+            .then(response => {
+              const resp = response.data;
+              if (resp.flag) {
+                saveCollection(resp.data);
+                //再获取collection数据
+                collection = getCollection();
+                this.reload();
+              }
+            })
+            .catch(error => {
+              console.log("收藏夹为空", error);
+            });
+        }
       }
       musicApi
         .getMusicSearch(
@@ -366,20 +376,25 @@ export default {
         .then(response => {
           const resp = response.data;
 
-          musicApi.getSongListWithSongBy(collection).then(response => {
-            const resp2 = response.data;
-            const songIds = resp2.data;
-            for (let i = 0; i < songIds.length; i++) {
-              for (let j = 0; j < resp.data.length; j++) {
-                if (songIds[i].songId == resp.data[j].songId) {
-                  resp.data[j].isCollection = true;
+          if (collection) {
+            musicApi.getSongListWithSongBy(collection).then(response => {
+              const resp2 = response.data;
+              const songIds = resp2.data;
+              for (let i = 0; i < songIds.length; i++) {
+                for (let j = 0; j < resp.data.length; j++) {
+                  if (songIds[i].songId == resp.data[j].songId) {
+                    resp.data[j].isCollection = true;
+                  }
                 }
               }
-            }
 
+              this.songList = resp.data;
+              this.songListTotalCount = resp.page.totalCount;
+            });
+          } else {
             this.songList = resp.data;
             this.songListTotalCount = resp.page.totalCount;
-          });
+          }
         });
     },
     handleSelect(key, keyPath) {},
@@ -392,7 +407,7 @@ export default {
       return "";
     },
 
-    palyMusic(index) {
+    playMusic(index) {
       //先初始化，让所有的按钮和音乐回复原样
       this.index = index;
       this.GLOBAL_AUDIO.pause();
@@ -426,6 +441,11 @@ export default {
           "class",
           "main-play-buttom el-icon-video-pause"
         );
+
+        //添加歌曲历史
+        musicApi.addUserHistorySong(music.songId).then(response => {
+          let resp = response.data;
+        });
       } else {
         this.isPlay = false;
         this.GLOBAL_AUDIO.pause(); //暂停

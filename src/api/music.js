@@ -1,7 +1,9 @@
 import request from "@/utils/request";
 import store from "@/store";
+//import { getUser } from "@/utils/auth";
 
 const userStore = store.state.user.user;
+//let userStore = getUser();
 
 export default {
   getTypeListSearch(page, size, searchMap) {
@@ -15,12 +17,17 @@ export default {
   },
 
   getMusicSearch(page, size, searchMap) {
+    let typeIds = [];
+    searchMap.typeId.forEach(id => {
+      typeIds.push(id);
+    });
+    typeIds.push();
     return request({
       url: `/song/queryListPage/${page}/${size}`,
       method: "post",
       data: {
         songName: searchMap.songName,
-        typeId: searchMap.typeId
+        searchTypeIds: typeIds
       }
     });
   },
@@ -107,10 +114,79 @@ export default {
 
   //根据用户ID来获取所有的收藏夹信息
   getgetSongListsByUserId() {
+    if (userStore) {
+      const userId = userStore.userId;
+      return request({
+        url: `/songList/getgetSongListsByUserId/${userId}`,
+        method: "get"
+      });
+    }
+  },
+
+  //根据用户ID来查询自己收听过的歌曲历史信息
+  getUserHistorySongsByUserId() {
+    if (userStore) {
+      const userId = userStore.userId;
+      return request({
+        url: `/userHistorySong/getUserHistorySongsByUserId/${userId}`,
+        method: "get"
+      });
+    }
+  },
+
+  //添加自己收听的歌曲
+  addUserHistorySong(songId) {
+    if (userStore) {
+      const userId = userStore.userId;
+      return request({
+        url: `/userHistorySong/addUserHistorySong`,
+        method: "post",
+        data: {
+          userId: userId,
+          songs: [
+            {
+              songId: songId
+            }
+          ]
+        }
+      });
+    }
+  },
+
+  //根据收藏夹ID来查询所有歌曲列表
+  getSongListBySongListId(songListId) {
+    return request({
+      url: `/song/getSongListBySongListId/${songListId}`,
+      method: "get"
+    });
+  },
+
+  //根据用户ID来清空他所有的历史记录
+  deleteAllHistorySongByUserId() {
     const userId = userStore.userId;
     return request({
-      url: `/songList/getgetSongListsByUserId/${userId}`,
+      url: `/userHistorySong/deleteAllHistorySongByUserId/${userId}`,
+      method: "delete"
+    });
+  },
+
+  //获取所有的音频类型
+  getTypesAll() {
+    return request({
+      url: "/type/getTypesAll",
       method: "get"
+    });
+  },
+
+  //添加音乐
+  addSong(song) {
+    return request({
+      url: `/song/addSong/${song.singerName}`,
+      method: "post",
+      data: {
+        songName: song.songName,
+        typeId: song.typeId
+      }
     });
   }
 };
