@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2019-10-13 14:21:54
+ * @LastEditTime: 2019-12-20 15:41:28
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \home\pb-music\vue.config.js
+ */
 module.exports = {
   outputDir: "pb-music", //打包的文件目录
   devServer: {
