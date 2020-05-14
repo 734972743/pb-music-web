@@ -1,9 +1,17 @@
+/*
+ * @Author: your name
+ * @Date: 2019-12-20 16:08:47
+ * @LastEditTime : 2020-01-17 19:41:44
+ * @LastEditors  : Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \home\pb-music\src\utils\request.js
+ */
 import axios from "axios";
 import { Loading, Message } from "element-ui";
 
 const request = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
-  timeout: 20000
+  timeout: 40000
 });
 
 //在请求和响应中加入拦截器 Interceptors
@@ -53,7 +61,8 @@ request.interceptors.response.use(
     if (resp.code !== 200) {
       Message({
         message: resp.message ? resp.message : "500,服务异常",
-        type: "warning"
+        type: "warning",
+        duration: 2000
       });
     }
     return response;
@@ -77,7 +86,7 @@ request.interceptors.response.use(
       Message({
         message: errorMsg,
         type: "error",
-        duration: 5000
+        duration: 2000
       });
     }
 

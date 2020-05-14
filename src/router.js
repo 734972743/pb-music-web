@@ -11,7 +11,8 @@ import myMusicHistory from "./views/MyMusic/MyMusicHistory";
 import MyCreateSongList from "./views/MyMusic/MyCreateSongList";
 import MyUploadSong from "./views/MyMusic/MyUploadSong";
 
-import VIP from "./views/VIP";
+import Video from "./views/video";
+import VideoDetail from "./views/video/videoDetail.vue";
 
 Vue.use(Router);
 
@@ -74,9 +75,21 @@ export default new Router({
           ]
         },
         {
-          path: "/vip",
-          name: "vip",
-          component: VIP
+          path: "/video",
+          name: "video",
+          component: Video
+          // children: [
+          //   {
+          //     path: "/video/videoDetail/:id",
+          //     name: "videoDetail",
+          //     component: VideoDetail
+          //   }
+          // ]
+        },
+        {
+          path: "/video/videoDetail/:id",
+          name: "videoDetail",
+          component: VideoDetail
         }
       ]
     }

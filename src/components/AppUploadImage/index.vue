@@ -134,7 +134,7 @@ export default {
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .el-upload {
   width: 300px;
   height: 30px;

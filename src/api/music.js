@@ -19,7 +19,10 @@ export default {
   getMusicSearch(page, size, searchMap) {
     let typeIds = [];
     searchMap.typeId.forEach(id => {
-      typeIds.push(id);
+      if (id != -1) {
+        //排除-1，也就是“所有” 则去查所有的歌曲
+        typeIds.push(id);
+      }
     });
     typeIds.push();
     return request({
@@ -136,21 +139,25 @@ export default {
 
   //添加自己收听的歌曲
   addUserHistorySong(songId) {
-    if (userStore) {
-      const userId = userStore.userId;
-      return request({
-        url: `/userHistorySong/addUserHistorySong`,
-        method: "post",
-        data: {
-          userId: userId,
-          songs: [
-            {
-              songId: songId
-            }
-          ]
-        }
-      });
-    }
+    return new Promise((resolve, rejecct) => {
+      if (userStore) {
+        const userId = userStore.userId;
+        return request({
+          url: `/userHistorySong/addUserHistorySong`,
+          method: "post",
+          data: {
+            userId: userId,
+            songs: [
+              {
+                songId: songId
+              }
+            ]
+          }
+        });
+      } else {
+        rejecct("没有登录");
+      }
+    });
   },
 
   //根据收藏夹ID来查询所有歌曲列表

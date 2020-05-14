@@ -179,12 +179,17 @@ export default {
 
     fetchData() {
       let that = this;
-      musicApi.getgetSongListsByUserId().then(response => {
-        const resp = response.data;
-        if (resp.flag) {
-          //this.collectionList = resp.data;
-        }
-      });
+      musicApi
+        .getgetSongListsByUserId()
+        .then(response => {
+          const resp = response.data;
+          if (resp.flag) {
+            //this.collectionList = resp.data;
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
 
       musicApi.getTypesAll(response => {
         let resp = response.data;
@@ -215,10 +220,15 @@ export default {
           song.typeId = this.uploadSongForm.typeId;
           // song.songName = this.uploadSongForm.songName;
           // song.songName = this.uploadSongForm.songName;
-          musicApi.addSong(song).then(response => {
-            let resp = response.data;
-            console.log("resp", resp);
-          });
+          musicApi
+            .addSong(song)
+            .then(response => {
+              let resp = response.data;
+              console.log("resp", resp);
+            })
+            .catch(error => {
+              console.log(error);
+            });
         }
       });
     }
@@ -226,7 +236,7 @@ export default {
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .el-button--primary {
   margin-top: 30px;
   margin-bottom: 20px;

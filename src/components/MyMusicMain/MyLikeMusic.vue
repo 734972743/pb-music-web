@@ -98,12 +98,17 @@ export default {
   methods: {
     //获取歌曲数据
     fetchData() {
-      musicApi.getCollectionSongByUserId().then(response => {
-        const resp = response.data;
-        if (resp.flag) {
-          this.songList = resp.data;
-        }
-      });
+      musicApi
+        .getCollectionSongByUserId()
+        .then(response => {
+          const resp = response.data;
+          if (resp.flag) {
+            this.songList = resp.data;
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
     formatterSongName(row, column) {
       let songName = row.songName;
@@ -184,7 +189,7 @@ export default {
         "main-play-buttom" + this.index
       );
 
-      if (this.isPlay) {
+      if (!this.isPlay) {
         this.GLOBAL_AUDIO.play(); //播放
         this.isPlay = true; //main-play-buttom
         mainPlayButtom.setAttribute(
@@ -204,7 +209,7 @@ export default {
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .el-menu-song-navbar,
 .el-table {
   margin-left: 190px;

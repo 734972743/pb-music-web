@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2019-12-20 16:08:46
+ * @LastEditTime : 2020-01-12 02:29:40
+ * @LastEditors  : Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \home\pb-music\src\api\user.js
+ */
 import request from "@/utils/request";
 import store from "@/store";
 
@@ -14,7 +22,8 @@ export default {
         loginId: userForm.loginId,
         password: userForm.password,
         userName: userForm.userName,
-        userSex: parseInt(userForm.userSex)
+        userSex: parseInt(userForm.userSex),
+        email: userForm.email
       }
     });
   },
@@ -65,7 +74,8 @@ export default {
         userSex: user.userSex,
         headSculptureUrl: user.headSculptureUrl,
         sign: user.sign,
-        userId: user.userId
+        userId: user.userId,
+        email: user.email
       }
     });
   },

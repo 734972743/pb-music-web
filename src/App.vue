@@ -1,3 +1,11 @@
+<!--
+ * @Author: your name
+ * @Date: 2019-10-13 13:23:44
+ * @LastEditTime: 2020-05-07 15:28:18
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \home\pb-music\src\App.vue
+ -->
 <template>
   <div id="app">
     <!-- 这个App.vue 中一定要有这个router-view组件，否则不能进行渲染  -->
@@ -30,10 +38,11 @@ export default {
 };
 </script>
 
-<style >
+<style>
 body {
   margin: 0px;
   padding: 0px;
   font-family: "微软雅黑";
+  overflow-y: auto;
 }
 </style>

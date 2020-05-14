@@ -19,7 +19,7 @@
       </span>
       <el-menu-item index="/hall">大厅</el-menu-item>
       <el-menu-item index="/myMusic">我的音乐</el-menu-item>
-      <el-menu-item index="/vip">VIP</el-menu-item>
+      <el-menu-item index="/video">视频</el-menu-item>
 
       <!-- 搜索框组件 -->
       <el-form
@@ -34,7 +34,7 @@
         <el-form-item>
           <el-input
             v-model="searchForm.title"
-            placeholder="搜索音乐，歌手"
+            placeholder="搜索音乐,歌手, 视频"
             autocomplete="on"
             blur="blurTitle"
             @keyup.enter.native="search('searchForm')"
@@ -110,7 +110,7 @@
         </el-form-item>
 
         <el-form-item class="register-text">
-          没有账号，请<a @click="openRegister" href="#">注册</a>
+          没有账号，请<a @click="openRegister()" href="#">注册</a>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -159,6 +159,12 @@
         <el-form-item label="性别" prop="userSex">
           <el-radio v-model="registerUserForm.userSex" label="0">男</el-radio>
           <el-radio v-model="registerUserForm.userSex" label="1">女</el-radio>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input
+            v-model="registerUserForm.email"
+            autocomplete="off"
+          ></el-input>
         </el-form-item>
 
         <el-form-item>
@@ -314,27 +320,37 @@ export default {
         userId: this.userId,
         password: value
       };
-      userApi.checkPwd(user).then(response => {
-        const resp = response.data;
-        if (resp.flag) {
-          callback();
-        } else {
-          callback(new Error(resp.message));
-        }
-      });
+      userApi
+        .checkPwd(user)
+        .then(response => {
+          const resp = response.data;
+          if (resp.flag) {
+            callback();
+          } else {
+            callback(new Error(resp.message));
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     };
 
     //验证账号是否已存在
     const valiHasLoginId = (rule, value, callback) => {
       if (value && value.length >= 3) {
-        userApi.valiAccount(value).then(response => {
-          const resp = response.data;
-          if (resp.flag) {
-            callback();
-          } else {
-            callback(new Error("该账户已存在，请修改一下你的账户名"));
-          }
-        });
+        userApi
+          .valiAccount(value)
+          .then(response => {
+            const resp = response.data;
+            if (resp.flag) {
+              callback();
+            } else {
+              callback(new Error("该账户已存在，请修改一下你的账户名"));
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
       } else {
         callback();
       }
@@ -366,7 +382,8 @@ export default {
         password: "",
         userName: "",
         userSex: "0",
-        registerCheckPassword: ""
+        registerCheckPassword: "",
+        email: ""
       },
       rulesRegister: {
         loginId: [
@@ -381,7 +398,10 @@ export default {
           { required: true, message: "确认密码不能为空", trigget: "blur" },
           { validator: valiCheckPass, trigget: "blur" }
         ],
-        userName: [{ required: true, message: "昵称不能为空", trigget: "blur" }]
+        userName: [
+          { required: true, message: "昵称不能为空", trigget: "blur" }
+        ],
+        email: [{ required: true, message: "邮箱不能为空", trigget: "blur" }]
       },
       updatePsdVisible: false, //修改密码弹出框是否显示
       updatePsdForm: {
@@ -430,18 +450,18 @@ export default {
     },
 
     search(formName) {
-      const title = this.$store.state.music.searchTitle;
-      const searchForm = {
-        songName: title
-      };
+      //searchForm.title
+      // const title = this.$store.state.music.searchTitle;
+      const title = this.searchForm.title;
+      let url = this.$route.path;
+
+      if (url == "/video") {
+        PubSub.publish("searchVideoPubSub", title);
+      } else {
+        PubSub.publish("searchMusicPubSub", title);
+      }
 
       //使用发布订阅模式给AppMain组件发送查询音乐列表的方法
-      PubSub.publish("searchMusicPubSub", this.searchForm.title);
-
-      // musicApi.getMusicSearch(1, 10, searchForm).then(response => {
-      //   const resp = response.data;
-      //   // this.$store.dispatch("",resp.data.rows)
-      // });
     },
 
     //打开登录弹窗
@@ -456,17 +476,22 @@ export default {
     login(formName) {
       this.$refs[formName].validate(vali => {
         if (vali) {
-          this.$store.dispatch("Login", this.userForm).then(resp => {
-            this.$message({
-              message: resp.message,
-              type: resp.flag ? "success" : "warning"
+          this.$store
+            .dispatch("Login", this.userForm)
+            .then(resp => {
+              this.$message({
+                message: resp.message,
+                type: resp.flag ? "success" : "warning"
+              });
+              if (resp.flag) {
+                this.loginVisible = false;
+                this.user = getUser();
+                this.reload();
+              }
+            })
+            .catch(error => {
+              console.log(error);
             });
-            if (resp.flag) {
-              this.loginVisible = false;
-              this.user = getUser();
-              this.reload();
-            }
-          });
         } else {
           return false;
         }
@@ -484,17 +509,22 @@ export default {
             // this.$refs["user-upload-image"].clearFiles();
             //要查询数据
 
-            userApi.getUsers({}).then(response => {
-              const resp = response.data;
-              if (resp.flag) {
-                const data = resp.data[0];
-                this.updateUserInfoForm.userName = data.userName;
-                this.updateUserInfoForm.userSex = data.userSex + "";
-                this.updateUserInfoForm.headSculptureUrl =
-                  data.headSculptureUrl;
-                this.updateUserInfoForm.sign = data.sign;
-              }
-            });
+            userApi
+              .getUsers({})
+              .then(response => {
+                const resp = response.data;
+                if (resp.flag) {
+                  const data = resp.data[0];
+                  this.updateUserInfoForm.userName = data.userName;
+                  this.updateUserInfoForm.userSex = data.userSex + "";
+                  this.updateUserInfoForm.headSculptureUrl =
+                    data.headSculptureUrl;
+                  this.updateUserInfoForm.sign = data.sign;
+                }
+              })
+              .catch(error => {
+                console.log(error);
+              });
           });
           //this.openUpdatePsd();
           break;
@@ -520,7 +550,8 @@ export default {
           password: "",
           userName: "",
           userSex: "0",
-          registerCheckPassword: ""
+          registerCheckPassword: "",
+          email: ""
         };
       });
     },
@@ -529,17 +560,22 @@ export default {
       this.$refs[formName].validate(vali => {
         if (vali) {
           delete this.registerUserForm.registerCheckPassword; //移除registerCheckPassword 确认密码属性
-          this.$store.dispatch("Register", this.registerUserForm).then(resp => {
-            this.$message({
-              message: resp.message,
-              type: resp.flag ? "success" : "warning"
+          this.$store
+            .dispatch("Register", this.registerUserForm)
+            .then(resp => {
+              this.$message({
+                message: resp.message,
+                type: resp.flag ? "success" : "warning"
+              });
+              if (resp.flag) {
+                this.registerVisible = false;
+                this.user = getUser();
+                this.reload();
+              }
+            })
+            .catch(error => {
+              console.log(error);
             });
-            if (resp.flag) {
-              this.registerVisible = false;
-              this.user = getUser();
-              this.reload();
-            }
-          });
         } else {
           return false;
         }
@@ -564,25 +600,30 @@ export default {
             password: this.updatePsdForm.password
           };
 
-          userApi.updatePsd(user).then(response => {
-            const resp = response.data;
+          userApi
+            .updatePsd(user)
+            .then(response => {
+              const resp = response.data;
 
-            if (resp.flag) {
-              this.$message({
-                message:
-                  resp.message +
-                  `,你的新密码为:${this.updatePsdForm.password},请重新登录`,
-                type: resp.flag ? "success" : "warning"
-              });
-              this.updatePsdVisible = false;
-              this.$store.dispath("Logout");
-            } else {
-              this.$message({
-                message: resp.message,
-                type: "warning"
-              });
-            }
-          });
+              if (resp.flag) {
+                this.$message({
+                  message:
+                    resp.message +
+                    `,你的新密码为:${this.updatePsdForm.password},请重新登录`,
+                  type: resp.flag ? "success" : "warning"
+                });
+                this.updatePsdVisible = false;
+                this.$store.dispath("Logout");
+              } else {
+                this.$message({
+                  message: resp.message,
+                  type: "warning"
+                });
+              }
+            })
+            .catch(error => {
+              console.log(error);
+            });
         }
       });
     },
@@ -632,16 +673,18 @@ export default {
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .logo {
   float: left;
   margin-right: 73px;
   vertical-align: middle; /* 垂直居中 */
   text-align: center;
+  margin-right: 137px;
 }
 .title {
+  position: absolute;
   font-size: 30px;
-  margin-top: 5px;
+  top: 11px;
 }
 
 .el-menu-item {

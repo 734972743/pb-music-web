@@ -1,7 +1,19 @@
 <template>
   <!-- 热门歌曲 -->
+
   <div class="mod_index-hot">
-    <div></div>
+    <div class="guanggao">
+      <span class="logo">
+        <img src="@/assets/logo.png" alt="" width="60px" />
+        <span class="title">{{ title }}</span>
+      </span>
+      <div class="tip">有你想听想看的</div>
+      <el-button type="primary" @click="downClient" icon="el-icon-mobile"
+        >下载安卓客户端</el-button
+      >
+    </div>
+
+    <!--
     <div>
       <div
         class="playlist__item_box"
@@ -38,22 +50,37 @@
       </div>
     </div>
     <div></div>
+    -->
 
-    <!--    歌曲列表   -->
-    <el-radio-group v-model="songTypeIndex" @change="changeSongType">
-      <el-radio-button label="所有"></el-radio-button>
-      <el-radio-button label="新歌"></el-radio-button>
+    <div><advertisement /></div>
+
+    <!--    歌曲列表 
+     @click.native="changeSongType(type.typeId)"
+      -->
+    <el-radio-group
+      v-model="songTypeIndex"
+      @change="changeSongType(type.typeId)"
+      v-for="type in typeList"
+    >
+      <el-radio-button :label="type.typeName"></el-radio-button>
+
+      <!--
+        
+       <el-radio-button label="所有"></el-radio-button>
+         <el-radio-button label="新歌"></el-radio-button>
       <el-radio-button label="热门歌曲"></el-radio-button>
       <el-radio-button label="纯音乐"></el-radio-button>
-      <el-radio-button label="曲艺"></el-radio-button>
+      <el-radio-button label="曲艺"></el-radio-button> -->
     </el-radio-group>
 
     <!-- 列表 -->
     <el-table
       :data="songList"
+      class="songListTable"
       style="width: 100%"
-      height="500px"
+      height="60vh"
       ref="songTable"
+      highlight-current-row
       :row-class-name="tableRowClassName"
     >
       <el-table-column
@@ -191,17 +218,23 @@
 
 <script>
 import musicApi from "@/api/music";
+import Advertisement from "@/components/Advertisement";
 
 //let audio = new Audio();
 
 const PubSub = require("pubsub-js");
 
 import { saveCollection, getCollection } from "@/utils/auth.js";
+import typeApi from "@/api/type.js";
 
 export default {
   inject: ["reload"], //注入依赖， 这个依赖在App.vue中定义了，这个是用于刷新页面
+  components: {
+    Advertisement
+  },
   data() {
     return {
+      title: "PB音乐",
       user: null, //用户信息
       typeList: [],
       activeIndex: "/newSong",
@@ -219,7 +252,7 @@ export default {
       songListCurpage: 1, //当前页
       songListPageSize: 10, //每页显示的条数
       isPlay: false, //是否播放,
-      index: 0, //歌曲所在行的下标
+      index: -1, //歌曲所在行的下标
       newCollectionVisible: false,
       newCollectionForm: {
         collectionName: "",
@@ -254,6 +287,7 @@ export default {
 
     this.initData();
     this.fetchMusicData();
+    this.fetchTypeData();
 
     PubSub.subscribe("searchMusicPubSub", (event, title) => {
       this.searchMap.songName = title;
@@ -299,25 +333,36 @@ export default {
     //初始化数据
     initData() {
       this.user = this.$store.state.user.user;
-      this.changeSongType("所有");
+      this.changeSongType("-1");
+    },
+
+    fetchTypeData() {
+      this.typeList.push({ typeId: -1, typeName: "所有" });
+      typeApi
+        .getTypesAll()
+        .then(response => {
+          let resp = response.data;
+          if (resp.code == 200) {
+            resp.data.forEach(item => {
+              this.typeList.push({
+                typeId: item.typeId,
+                typeName: item.typeName
+              });
+            });
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
 
     changeSongType(val) {
       switch (val) {
-        case "所有":
+        case "-1": //所有
           this.searchMap.typeId = [];
           break;
-        case "新歌":
-          this.searchMap.typeId = [1];
-          break;
-        case "热门歌曲":
-          this.searchMap.typeId = [2];
-          break;
-        case "纯音乐":
-          this.searchMap.typeId = [10];
-          break;
-        case "曲艺":
-          this.searchMap.typeId = [13, 14, 15, 16];
+        default:
+          this.searchMap.typeId = [val];
           break;
       }
       this.fetchMusicData();
@@ -326,22 +371,6 @@ export default {
     formatterSongName(row, column) {
       let songName = row.songName;
       return songName.substring(0, songName.lastIndexOf("."));
-    },
-
-    fetchTypeData() {
-      this.typeList = [];
-      musicApi.getTypeListSearch(1, 10, {}).then(response => {
-        const resp = response.data;
-        let i = 1;
-        resp.data.rows.forEach(element => {
-          if (i <= 5) {
-            this.typeList.push(element);
-            i++;
-          } else {
-            return true;
-          }
-        });
-      });
     },
 
     fetchMusicData() {
@@ -399,15 +428,18 @@ export default {
     },
     handleSelect(key, keyPath) {},
     tableRowClassName({ row, rowIndex }) {
-      if (rowIndex === 1) {
+      if (row.isPlay == true && rowIndex == this.index) {
+        //return "warning-row";
+        return "current-row";
+      } else {
+        //return "success-row";
         return "warning-row";
-      } else if (rowIndex === 3) {
-        return "success-row";
       }
-      return "";
     },
 
     playMusic(index) {
+      //跳转到播放音乐详情页面
+
       //先初始化，让所有的按钮和音乐回复原样
       this.index = index;
       this.GLOBAL_AUDIO.pause();
@@ -424,6 +456,7 @@ export default {
       let mainPlayButtom = document.getElementById("main-play-buttom" + index);
 
       let music = this.songList[index];
+
       if (!this.isPlay) {
         //songUrl
         // const src = row.songUrl
@@ -443,9 +476,19 @@ export default {
         );
 
         //添加歌曲历史
-        musicApi.addUserHistorySong(music.songId).then(response => {
-          let resp = response.data;
-        });
+        musicApi
+          .addUserHistorySong(music.songId)
+          .then(response => {
+            let resp = response.data;
+            if (resp.code == 200) {
+              console.log("添加歌曲历史成功");
+            } else {
+              console.log("添加歌曲历史失败");
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
       } else {
         this.isPlay = false;
         this.GLOBAL_AUDIO.pause(); //暂停
@@ -454,13 +497,13 @@ export default {
           "main-play-buttom el-icon-video-play"
         );
       }
+
       //把当前播放的音乐数据保存到state中
       //let music = this.songList[index];
 
       music.isPlay = this.isPlay;
       music.audio = this.GLOBAL_AUDIO;
       music.index = index;
-
       this.$store.dispatch("SaveMusic", music); //把当前播放的音乐保存到state中
 
       PubSub.publish("playMusicPub", music); //发布播放音乐这个事件
@@ -566,14 +609,22 @@ export default {
                 this.newCollectionVisible = false;
                 //成功之后，应查询该用户所有的收藏夹，并保存到localStorage中
 
-                musicApi.getgetSongListsByUserId().then(response => {
-                  const resp = response.data;
-                  if (resp.flag) {
-                    saveCollection(resp.data);
-                    this.reload();
-                  }
-                });
+                musicApi
+                  .getgetSongListsByUserId()
+                  .then(response => {
+                    const resp = response.data;
+                    if (resp.flag) {
+                      saveCollection(resp.data);
+                      this.reload();
+                    }
+                  })
+                  .catch(error => {
+                    console.log(error);
+                  });
               }
+            })
+            .catch(error => {
+              console.log(error);
             });
         }
       });
@@ -599,6 +650,12 @@ export default {
     openNewCollection() {
       this.newCollectionVisible = true;
       this.selectCollectionVisible = false;
+    },
+
+    //下载客户端
+    downClient() {
+      window.location.href =
+        "https://pb-20191014.oss-cn-beijing.aliyuncs.com/resources/other/PB%E9%9F%B3%E4%B9%9020200117.apk";
     }
   },
 
@@ -636,9 +693,43 @@ export default {
 };
 </script>
 
-<style  scoped>
+<style scoped type="scss">
 .mod_index-hot {
   text-align: center;
+}
+
+.guanggao {
+  /* 广告栏 */
+  position: fixed;
+  background-color: wheat;
+  width: 180px;
+  height: 180px;
+  top: 200px;
+  left: 1617px;
+  z-index: 1;
+  border-radius: 13px;
+}
+
+.guanggao .logo {
+  display: block;
+  margin: 9px auto 0;
+}
+
+.guanggao .logo .title {
+  position: relative;
+  top: -22px;
+  left: 8px;
+  font-weight: bold;
+  font-size: 21px;
+}
+
+.guanggao .tip {
+  display: block;
+  margin: 9px auto 0;
+}
+.guanggao .el-button--primary {
+  display: block;
+  margin: 9px auto 0;
 }
 
 .playlist__item_box {
@@ -689,5 +780,14 @@ export default {
   /* background-color: red; */
   margin-left: 0px;
   margin-top: -42px;
+}
+
+.songListTable >>> .el-table__body tr.current-row > td {
+  background-color: rgba(65, 188, 228, 0.5);
+}
+
+/** 这个时用来覆盖current-row 这个样式的背景颜色 */
+.songListTable >>> .warning-row > td {
+  background-color: white !important;
 }
 </style>

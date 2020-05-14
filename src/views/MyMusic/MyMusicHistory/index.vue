@@ -234,28 +234,33 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(() => {
-        musicApi.deleteAllHistorySongByUserId().then(response => {
-          let resp = response.data;
-          if (resp.flag) {
-            this.$message({
-              message: "删除成功",
-              type: "success"
-            });
-            this.reload();
-          } else {
-            this.$message({
-              message: "删除失败",
-              type: "warning"
-            });
-          }
-        });
+        musicApi
+          .deleteAllHistorySongByUserId()
+          .then(response => {
+            let resp = response.data;
+            if (resp.flag) {
+              this.$message({
+                message: "删除成功",
+                type: "success"
+              });
+              this.reload();
+            } else {
+              this.$message({
+                message: "删除失败",
+                type: "warning"
+              });
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
       });
     }
   }
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .el-menu-song-navbar,
 .el-table {
   margin-top: 20px;

@@ -1,5 +1,5 @@
 <template>
-  <div class="footer">
+  <div class="footer" v-if="isShow">
     <!-- <audio src="" id="mymusic"></audio> -->
     <!-- @loadedmetadata="onLoadedmetadata('audio')" 
     在canplay（浏览器可以开始播放该音视频）钩子函数回调中访问duration属性可获得（注：在dom挂载完直接获取duration会返回NaN）
@@ -17,31 +17,32 @@
       style="display:none;"
     ></audio>
 
-    <span class="palyStateImg" v-if="music && music.songName">
+    <span class="palyStateImg" v-if="this.music">
       <i @click="previousSong()" class="el-icon-arrow-left"></i>
       <i
-        v-if="music && music.isPlay"
-        @click="playMusic()"
+        v-if="this.music.isPlay"
+        @click="playMusic(true)"
         class="el-icon-video-pause"
         id="el-icon-video-play"
       ></i>
       <i
         v-else
-        @click="playMusic()"
+        @click="playMusic(false)"
         class="el-icon-video-play"
         id="el-icon-video-play"
       ></i>
 
       <i @click="nextSong()" class="el-icon-arrow-right"></i>
-      <span v-if="music">
+      <img :src="this.music.imgUrl | imgUrlFilter" alt="" width="80px" />
+      <!-- <span v-if="music">
         <img :src="music.imgUrl | imgUrlFilter" alt="" width="80px" />
       </span>
       <span v-else>
-        <img src="../../assets/logo.png" alt="" width="80px" />
-      </span>
+        <img src="@/assets/logo.png" alt="" width="80px" />
+      </span> -->
       <!-- <img src="@/assets/logo.png" alt="" width="80px" /> -->
     </span>
-    <span class="songInfo" v-if="music && music.songName">
+    <span class="songInfo" v-if="music && true">
       <!-- 上面是歌名 -->
       <div class="songName">{{ music ? music.songName : "" }}</div>
       <!-- 下面是歌曲进度条   -->
@@ -61,7 +62,7 @@
     </span>
 
     <!-- 这是是右边的图标样式 -->
-    <span class="rightIcon" v-if="music && music.songName">
+    <span class="rightIcon" v-if="music && true">
       <i class="el-icon-chat-dot-square" @click="chatNumVisible = true"></i>
       <span class="chatNum" v-if="chatNum" @click="chatNumVisible = true">{{
         chatNum
@@ -135,7 +136,6 @@
   </div>
 </template>
 
-
 <script>
 const PubSub = require("pubsub-js");
 
@@ -151,10 +151,14 @@ export default {
   inject: ["reload"], //注入依赖， 这个依赖在App.vue中定义了
 
   created() {
+    self = this;
     this.initData();
   },
 
-  updated() {},
+  updated() {
+    // console.log("进入updated方法");
+    // console.log("udpate", this.$store.state);
+  },
 
   //已挂载
   mounted() {
@@ -162,6 +166,14 @@ export default {
     //that.play = true;
 
     //let curTime = this.curTime;
+
+    PubSub.subscribe("playMusicPub", (event, music) => {
+      //歌曲进度条重置
+      this.curTime = 0;
+      this.sliderTime = 0;
+      this.audio.isPlay = music.isPlay;
+      this.audio.songName = music.songName;
+    });
 
     this.times = setInterval(() => {
       //只有当播放的时候这个当前进度才开始计数
@@ -172,7 +184,6 @@ export default {
       if (this.music) {
         if (this.music.isPlay) {
           this.curTime += 1;
-
           if (that.sliderTime >= 100) {
             window.clearInterval(times);
             this.nextSong();
@@ -182,7 +193,7 @@ export default {
         }
         this.current.startTime = this.timeFormat(this.curTime); //当前时间
         this.current.endtime = this.timeFormat(this.audio.maxTime); //结束时间
-        this.sliderTime = parseInt((this.curTime / this.audio.maxTime) * 100);
+        this.sliderTime = (this.curTime / this.audio.maxTime) * 100;
       }
     }, 1000);
 
@@ -205,7 +216,7 @@ export default {
 
           //暂停音乐
           this.music.isPlay = false;
-          this.playMusic();
+          this.playMusic(false);
           this.GLOBAL_AUDIO.pause();
         }
       }
@@ -214,6 +225,7 @@ export default {
 
   data() {
     return {
+      isShow: true, //这个foot是否显示出来
       sliderTime: 0, ////进度条的当前值 0为初始值， 100位最大值
 
       curTime: -1, //这是记录音乐当前播放的时间
@@ -221,7 +233,8 @@ export default {
       audio: {
         playing: false, // 该字段是音频是否处于播放状态的属性
         currentTime: 0, // 音频当前播放时长
-        maxTime: 0 //音频的总时长
+        maxTime: 0, //音频的总时长
+        audioName: "" //音频的名字
       },
       //play: false, // 播放暂停按钮
       current: {
@@ -280,10 +293,33 @@ export default {
       PubSub.publish("previousSongPubSub", this.music);
     },
 
-    //点击播放按钮的是否出发
-    playMusic() {
+    //点击播放按钮的是否播放
+    playMusic(flag) {
+      console.log("this.$store.music", this.$store.music);
+      if (this.$store.state.music) {
+        console.log(
+          "this.$store.state.music.music",
+          this.$store.state.music.music
+        );
+        this.music.imgUrl = this.$store.state.music.music.imgUrl;
+        this.music.isPlay = this.$store.state.music.music.isPlay;
+      }
+
+      //debugger;
+      console.log("playMusic", this.music);
       let footerPlayButtom = document.getElementById("el-icon-video-play");
-      if (this.music && this.music.isPlay) {
+      // if (this.music && this.music.isPlay) {
+      //   footerPlayButtom.setAttribute("class", "el-icon-video-pause");
+      //   this.music.isPlay = false;
+      //   // this.onPause();
+      // } else {
+      //   footerPlayButtom.setAttribute("class", "el-icon-video-play");
+      //   this.music.isPlay = true;
+      //   // this.onPlay();
+      // }
+      //debugger;
+      flag = !flag;
+      if (flag) {
         footerPlayButtom.setAttribute("class", "el-icon-video-pause");
         this.music.isPlay = false;
         // this.onPause();
@@ -295,6 +331,15 @@ export default {
 
       //把这个this.music.isPlay 保存到state中
       this.$store.dispatch("SaveIsPlay", this.music.isPlay);
+      // this.audio.audioName = this.music.songName;
+      // this.audio.currentTime = this.curTime;
+      // this.audio.isPlay = flag;
+
+      this.music.songName = this.music.songName;
+      this.music.currentTime = this.curTime;
+      this.music.isPlay = flag;
+
+      this.$store.dispatch("SaveMusic", this.music);
     },
 
     nextSong() {
@@ -364,7 +409,6 @@ export default {
     },
 
     changeSpeedTime(val) {
-      console.log("changeSpeedTime", val);
       this.sliderTime = val;
       this.curTime = this.audio.maxTime * (this.sliderTime / 100);
       this.GLOBAL_AUDIO.currentTime = this.curTime;
@@ -419,23 +463,28 @@ export default {
           let message = {};
           message.songId = this.music.songId;
           message.content = this.formMessage.content;
-          messageApi.replyMessage(message).then(response => {
-            let resp = response.data;
-            if (resp.flag) {
-              this.$message({
-                message: "评论成功",
-                type: "success"
-              });
-              this.formMessage.content = "";
-              this.chatNumVisible = false;
-              this.reload();
-            } else {
-              this.$message({
-                message: "评论失败",
-                type: "warning"
-              });
-            }
-          });
+          messageApi
+            .replyMessage(message)
+            .then(response => {
+              let resp = response.data;
+              if (resp.flag) {
+                this.$message({
+                  message: "评论成功",
+                  type: "success"
+                });
+                this.formMessage.content = "";
+                this.chatNumVisible = false;
+                this.reload();
+              } else {
+                this.$message({
+                  message: "评论失败",
+                  type: "warning"
+                });
+              }
+            })
+            .catch(error => {
+              console.log(error);
+            });
         }
       });
     }
@@ -451,17 +500,38 @@ export default {
         let songId = music.songId;
         //
         if (songId) {
-          messageApi.getCountBySongId(songId).then(response => {
-            let resp = response.data;
-            this.chatNum = resp;
-          });
+          messageApi
+            .getCountBySongId(songId)
+            .then(response => {
+              let resp = response.data;
+              if (resp.code == 200) {
+                this.chatNum = resp.data;
+              }
+            })
+            .catch(error => {
+              console.log(error);
+            });
 
-          messageApi.getMessagesBySongId(songId, 1, 10).then(response => {
-            let resp = response.data;
-            if (resp.flag) {
-              this.messageList = resp.data;
-            }
-          });
+          messageApi
+            .getMessagesBySongId(songId, 1, 10)
+            .then(response => {
+              let resp = response.data;
+              if (resp.flag) {
+                //给评论的作者设置作者名字
+                let users = resp.obj;
+                resp.data.forEach(message => {
+                  users.forEach(user => {
+                    if (message.userId == user.userId) {
+                      message.userId = user.userName;
+                    }
+                  });
+                });
+                this.messageList = resp.data;
+              }
+            })
+            .catch(error => {
+              console.log(error);
+            });
         }
       }
       this.curTime = -1; //把这个值设为默认值
@@ -476,7 +546,18 @@ export default {
   filters: {
     //这个是图片链接过滤器
     imgUrlFilter(val) {
-      return process.env.VUE_APP_IMG_BASE_URL + val;
+      if (!val) {
+        debugger;
+        val = self.music.imgUrl;
+        console.log("val", self.music);
+        //  val =
+        //    "https://pb-20191014.oss-cn-beijing.aliyuncs.com/resources/image/%E5%91%A8%E6%9D%B0%E4%BC%A6.jpg";
+      }
+      if (val.includes("https://pb-20191014.oss-cn-b")) {
+        return val;
+      } else {
+        return process.env.VUE_APP_IMG_BASE_URL + val;
+      }
     }
   },
 
@@ -484,22 +565,19 @@ export default {
     listenStoreMusic(newVal) {
       this.music = newVal;
 
-      if (!newVal.imgUrl) {
-        this.music.imgUrl =
-          "https://pb-20191014.oss-cn-beijing.aliyuncs.com/resources/image/%E5%91%A8%E6%9D%B0%E4%BC%A6.jpg";
-      }
-
       this.musicTimeSpan();
     },
 
     //这个是isPlay值发生变化的时候出发
-    listenStoreMusicIsPlay(newVal) {
+    //listenStoreMusicIsPlay(newVal) {
+    isPlay(newVal) {
       this.isPlay = newVal;
-      this.music.isPlay = newVal;
+      // this.music.isPlay = newVal;
+      this.audio.isPlay = newVal;
 
       let footerPlayButtom = document.getElementById("el-icon-video-play");
       if (footerPlayButtom) {
-        if (this.music && this.music.isPlay) {
+        if (this.audio.isPlay) {
           footerPlayButtom.setAttribute("class", "el-icon-video-pause");
         } else {
           footerPlayButtom.setAttribute("class", "el-icon-video-play");
@@ -508,16 +586,30 @@ export default {
     },
 
     //这是用来检测歌曲名发生变化的时候，用来清空data里面的数据
-    listenMusicName(newVal) {
-      let songName = this.$store.state.music.music.songName;
+    // audio: {
+    //   handler(newVal, oldVal) {
+    //     //  this.$store.state.music.music.songName = newVal;
+    //     //let songName = this.$store.state.music.music.songName;
 
-      this.initData();
+    //     this.initData();
+    //   },
+    //   deep: true
+    // },
+
+    //路由监听
+    $route(to) {
+      this.isShow = to.path.indexOf("video") === -1;
+      if (this.isShow) {
+        this.playMusic(true);
+      } else {
+        this.playMusic(false);
+      }
     }
   }
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .footer {
   margin-top: -40px;
 }

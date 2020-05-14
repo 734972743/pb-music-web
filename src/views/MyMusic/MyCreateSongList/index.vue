@@ -145,23 +145,33 @@ export default {
         type: "warning"
       })
         .then(() => {
-          musicApi.deleteUserWithSongList(row).then(response => {
-            const resp = response.data;
-            this.$message({
-              message: resp.message,
-              type: resp.flag ? "success" : "warning"
-            });
-            if (resp.flag) {
-              //删除之后要重新刷新数据
-              musicApi.getgetSongListsByUserId().then(response => {
-                const resp = response.data;
-                if (resp.flag) {
-                  saveCollection(resp.data);
-                  this.reload();
-                }
+          musicApi
+            .deleteUserWithSongList(row)
+            .then(response => {
+              const resp = response.data;
+              this.$message({
+                message: resp.message,
+                type: resp.flag ? "success" : "warning"
               });
-            }
-          });
+              if (resp.flag) {
+                //删除之后要重新刷新数据
+                musicApi
+                  .getgetSongListsByUserId()
+                  .then(response => {
+                    const resp = response.data;
+                    if (resp.flag) {
+                      saveCollection(resp.data);
+                      this.reload();
+                    }
+                  })
+                  .catch(error => {
+                    console.log(error);
+                  });
+              }
+            })
+            .catch(error => {
+              console.log(error);
+            });
         })
         .catch(() => {});
     },
@@ -172,12 +182,17 @@ export default {
 
     openSongList(row) {
       this.songListVisible = true;
-      musicApi.getSongListBySongListId(row.songListId).then(response => {
-        let resp = response.data;
-        if (resp.flag) {
-          this.songList = resp.data;
-        }
-      });
+      musicApi
+        .getSongListBySongListId(row.songListId)
+        .then(response => {
+          let resp = response.data;
+          if (resp.flag) {
+            this.songList = resp.data;
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
 
     palyMusic(index) {
@@ -237,7 +252,7 @@ export default {
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .main-play-buttom,
 .el-icon-download {
   font-size: 30px;
