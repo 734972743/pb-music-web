@@ -1,6 +1,15 @@
+/*
+ * @Author: your name
+ * @Date: 2019-12-20 16:08:47
+ * @LastEditTime: 2020-06-08 01:13:35
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \home\pb-music\src\log\NobugLog.js
+ */
+
 export function NobugLog() {
   console.log(
-    "        _ooOoo_\r\n" +
+    "                   _ooOoo_\r\n" +
       "                  o8888888o\r\n" +
       '                  88" . "88\r\n' +
       "                  (| -_- |)\r\n" +

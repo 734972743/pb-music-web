@@ -246,7 +246,7 @@ export default {
 
       this.$store.dispatch("SaveMusic", music); //把当前播放的音乐保存到state中
 
-      PubSub.publish("playMusicPub", music); //发布播放音乐这个事件
+      PubSub.publish("playMusicPubMyMusic", music); //发布播放音乐这个事件
     }
   }
 };

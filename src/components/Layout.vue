@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-12-20 16:08:47
- * @LastEditTime: 2020-05-07 15:35:47
+ * @LastEditTime: 2020-06-06 00:52:05
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \home\pb-music\src\components\Layout.vue
@@ -48,18 +48,6 @@ export default {
   overflow-x: hidden;
   /* background-color: red; */
 }
-.main {
-  position: relative;
-  height: auto;
-  width: 62.6vw;
-
-  margin-left: 18.33vw;
-  margin-right: 0px;
-  /* top: 12vh;
-  */
-  overflow-y: hidden;
-  overflow-x: hidden;
-}
 
 .footer {
   position: relative;
@@ -68,5 +56,42 @@ export default {
   background-color: #6a48d7;
   overflow-x: hidden;
   overflow-y: hidden;
+}
+
+/* 手机屏幕的字体大小 */
+@media screen and (max-width: 448px) {
+  .footer {
+    top: 9vh;
+    height: 7vh;
+  }
+}
+
+/* 笔记本电脑的字体大小 */
+@media screen and (max-width: 1500px) and (min-width: 448px) {
+  /* .main {
+    position: relative;
+    height: 1235px;
+    width: 62.6vw;
+
+    margin-left: 18.33vw;
+    margin-right: 0px;
+    overflow-y: hidden;
+    overflow-x: hidden;
+  } */
+  .main {
+    position: relative;
+    height: auto;
+    width: 62.6vw;
+
+    margin-left: 18.33vw;
+    margin-right: 0px;
+
+    overflow-y: hidden;
+    overflow-x: hidden;
+  }
+
+  .footer {
+    height: 7vh;
+  }
 }
 </style>

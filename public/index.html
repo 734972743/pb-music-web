@@ -1,52 +1,67 @@
+<!--
+ * @Author: your name
+ * @Date: 2019-10-13 13:23:44
+ * @LastEditTime: 2020-06-05 17:14:38
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \home\pb-music\public\index.html
+-->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <!-- 下面的是让手机端也能正常显示的 -->
-    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=0.3, maximum-scale=1.0, minimum-scale=0.3" >
-    <link rel="icon" href="<%= BASE_URL %>favicon.png">
-    <title>PB音乐</title>
 
-    <script type="text/javascript" >
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <!-- 下面的是让手机端也能正常显示的 -->
+  <meta name="viewport"
+    content="width=device-width, user-scalable=yes, initial-scale=0.3, maximum-scale=1.0, minimum-scale=0.3">
+  <link rel="icon" href="<%= BASE_URL %>favicon.png">
+  <title>PB音乐</title>
+  <script src="//lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-function IsPC() {
-    var userAgentInfo = navigator.userAgent;
-    var Agents = ["Android", "iPhone",
-                "SymbianOS", "Windows Phone",
-                "iPad", "iPod"];
-    var flag = true;
-    for (var v = 0; v < Agents.length; v++) {
+  <script type="text/javascript">
+
+    function IsPC() {
+      var userAgentInfo = navigator.userAgent;
+      var Agents = ["Android", "iPhone",
+        "SymbianOS", "Windows Phone",
+        "iPad", "iPod"];
+      var flag = true;
+      for (var v = 0; v < Agents.length; v++) {
         if (userAgentInfo.indexOf(Agents[v]) > 0) {
-            flag = false;
-            break;
+          flag = false;
+          break;
         }
+      }
+      return flag;
     }
-    return flag;
-  }
-  
-  /*
-   var flag = IsPC(); //true为PC端，false为手机端
-  if(!flag){
 
-  } 
-  */
+    /*
+     var flag = IsPC(); //true为PC端，false为手机端
+    if(!flag){
+
+    }
+    */
 
 
-    
-    </script>
-  </head>
-  <body>
 
-    <div style="display:none">
-      <!-- 友盟网址访问流量统计代码  -->
-        <script type="text/javascript" src="https://s9.cnzz.com/z_stat.php?id=1278607154&web_id=1278607154"></script>
-    </div> 
-    <noscript>
-      <strong>We're sorry but pb-music doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+  </script>
+</head>
+
+<body>
+
+
+  <noscript>
+    <strong>We're sorry but pb-music doesn't work properly without JavaScript enabled. Please enable it to
+      continue.</strong>
+  </noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
+<!-- 明月浩空音乐播放器 -->
+<!-- <script src="https://player.lmih.cn/player/js/player.js" id="myhk" key="159129241051" m="1"></script> -->
+
 </html>

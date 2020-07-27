@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-12-20 16:08:47
- * @LastEditTime: 2020-04-24 14:03:34
+ * @LastEditTime: 2020-06-25 23:16:57
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \home\pb-music\src\views\video\index.vue
@@ -10,29 +10,17 @@
   <div class="videoWindow">
     <!-- 列表 -->
     <div class="videoList">
-      <div
-        class="imglist-item"
-        v-for="(video, index) in videoList"
-        :key="video.id"
-        @click="goToVideoDetail(video)"
-        :class="(index + 1) % 4 !== 0 ? 'videoDiv' : ''"
-      >
+      <div class="imglist-item" v-for="(video, index) in videoList" :key="video.id" @click="goToVideoDetail(video)">
+        <!-- :class="(index + 1) % 4 !== 0 ? 'videoDiv' : ''"> -->
         <img :src="video.videoImageUrl" alt="" />
         <p class="videoName">{{ video.videoName }}</p>
       </div>
     </div>
     <div></div>
     <!-- 列表分页 -->
-    <el-pagination
-      class="fenye"
-      @size-change="handleSizeChangeVideoList"
-      @current-change="handleCurrentChangeVideoList"
-      :current-page="curpage"
-      :page-sizes="[12, 24, 60, 120]"
-      :page-size="pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-    >
+    <el-pagination class="fenye" @size-change="handleSizeChangeVideoList" @current-change="handleCurrentChangeVideoList"
+      :current-page="curpage" :page-sizes="[12, 24, 60, 120]" :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper" :total="total">
     </el-pagination>
   </div>
 </template>
@@ -99,6 +87,13 @@ export default {
   padding: 0px;
 }
 
+.videoList {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  justify-items: center;
+}
+
 .main-play-buttom {
   font-size: 26px;
 }
@@ -114,8 +109,8 @@ export default {
 }
 
 .imglist-item img {
-  width: 220px;
-  height: 170px;
+  width: 331px;
+  height: 190px;
   margin-top: 10px;
   margin-left: 30px;
 }

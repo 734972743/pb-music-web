@@ -21,7 +21,7 @@ Vue.use(Router);
 
 const originalPush = Router.prototype.push;
 Router.prototype.push = function push(location) {
-  return originalPush.call(this, location).catch(err => err);
+  return originalPush.call(this, location).catch((err) => err);
 };
 
 export default new Router({
@@ -42,9 +42,9 @@ export default new Router({
             {
               path: "/hall/music",
               name: "music",
-              component: AppMusic
-            }
-          ]
+              component: AppMusic,
+            },
+          ],
         },
         {
           path: "/myMusic",
@@ -55,29 +55,29 @@ export default new Router({
             {
               path: "/myMusic/myLikeMusic",
               name: "myLikeMusic",
-              component: MyLikeMusic
+              component: MyLikeMusic,
             },
             {
               path: "/myMusic/myMusicHistory",
               name: "myMusicHistory",
-              component: myMusicHistory
+              component: myMusicHistory,
             },
             {
               path: "/myMusic/myCreateSongList",
               name: "myCreateSongList",
-              component: MyCreateSongList
+              component: MyCreateSongList,
             },
             {
               path: "/myMusic/myUploadSong",
               name: "myUploadSong",
-              component: MyUploadSong
-            }
-          ]
+              component: MyUploadSong,
+            },
+          ],
         },
         {
           path: "/video",
           name: "video",
-          component: Video
+          component: Video,
           // children: [
           //   {
           //     path: "/video/videoDetail/:id",
@@ -89,9 +89,9 @@ export default new Router({
         {
           path: "/video/videoDetail/:id",
           name: "videoDetail",
-          component: VideoDetail
-        }
-      ]
-    }
-  ]
+          component: VideoDetail,
+        },
+      ],
+    },
+  ],
 });
